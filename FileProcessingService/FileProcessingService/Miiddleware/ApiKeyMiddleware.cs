@@ -1,4 +1,6 @@
-﻿namespace FileProcessingService.Miiddleware
+﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
+
+namespace FileProcessingService.Miiddleware
 {
     public class ApiKeyMiddleware
     {
@@ -17,6 +19,16 @@
             {
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 await context.Response.WriteAsync("API key is required.");
+                return;
+            }
+
+            var _config = _configuration["ApiKey"];
+            var key = context.Request.Headers["X-API-Key"];
+
+            if (key != _config)
+            {
+                context.Response.StatusCode = 401;
+                await context.Response.WriteAsync("Invalid API key.");
                 return;
             }
 
