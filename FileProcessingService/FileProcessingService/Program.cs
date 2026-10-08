@@ -9,6 +9,7 @@ builder.Services.AddControllers();
 
 // Services
 builder.Services.AddScoped<IFileProcessor, CsvFileProcessor>();
+builder.Services.AddSingleton<FileTrackingService>();
 
 
 builder.Services.AddEndpointsApiExplorer();
