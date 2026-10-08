@@ -8,12 +8,12 @@ namespace FileProcessingService.Controllers
     public class FilesController : ControllerBase
     {
         // Post - CSV to receive and average the numbers in the CSV file and return the average as a response
+        [Route("process-csv")]
         [HttpPost]
-        public IActionResult PostCsv(IFormFile file)
+        public IActionResult ProcessCSV(IFormFile file)
         {
             try
             {
-
                 if (file == null || file.Length == 0)
                 {
                     return BadRequest("Please upload a file !");
@@ -23,11 +23,9 @@ namespace FileProcessingService.Controllers
 
                 Console.WriteLine($"Processing : {fileName}...");
 
-                var numbers = new List<int>();
-
+                var numbers = new List<double>();
 
                 using var reader = new StreamReader(file.OpenReadStream());
-
 
                 while (!reader.EndOfStream)
                 {
@@ -40,7 +38,7 @@ namespace FileProcessingService.Controllers
                         continue;
                     }
 
-                    if (int.TryParse(line, out var number))
+                    if (double.TryParse(line, out var number))
                     {
                         numbers.Add(number);
                     }
@@ -51,15 +49,12 @@ namespace FileProcessingService.Controllers
                     return BadRequest($"File {fileName} does not contain any numbers !");
                 }
 
-
-
                 int count = numbers.Count;
 
                 double average = numbers.Average();
 
                 Console.WriteLine("File Processed !");
                 Console.WriteLine($"File name: {fileName} - Count: {count} - Average: {average}");
-
 
                 return Ok(new
                 {
