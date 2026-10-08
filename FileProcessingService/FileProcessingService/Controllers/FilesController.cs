@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using FileProcessingService.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FileProcessingService.Controllers
@@ -7,69 +9,30 @@ namespace FileProcessingService.Controllers
     [ApiController]
     public class FilesController : ControllerBase
     {
+        private readonly IFileProcessor _fileProcessor;
+
+        public FilesController(IFileProcessor fileProcessor)
+        {
+            _fileProcessor = fileProcessor;
+        }
+
         // Post - CSV to receive and average the numbers in the CSV file and return the average as a response
         [Route("process-csv")]
         [HttpPost]
-        public IActionResult ProcessCSV(IFormFile file)
+        public async Task<IActionResult> ProcessCSV(IFormFile file)
         {
             try
             {
-                if (file == null || file.Length == 0)
-                {
-                    return BadRequest("Please upload a file !");
-                }
-
-                string fileName = file.FileName;
-
-                Console.WriteLine($"Processing : {fileName}...");
-
-                var numbers = new List<double>();
-
-                using var reader = new StreamReader(file.OpenReadStream());
-
-                while (!reader.EndOfStream)
-                {
-
-                    var line = reader.ReadLine();
-
-
-                    if (string.IsNullOrWhiteSpace(line))
-                    {
-                        continue;
-                    }
-
-                    if (double.TryParse(line, out var number))
-                    {
-                        numbers.Add(number);
-                    }
-                }
-
-                if (numbers.Count == 0)
-                {
-                    return BadRequest($"File {fileName} does not contain any numbers !");
-                }
-
-                int count = numbers.Count;
-
-                double average = numbers.Average();
-
-                Console.WriteLine("File Processed !");
-                Console.WriteLine($"File name: {fileName} - Count: {count} - Average: {average}");
-
-                return Ok(new
-                {
-                    fileName = fileName,
-                    count = count,
-                    average = average
-                });
+                var result = await _fileProcessor.ProcessAsync(file);
+                return Ok(result);
 
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error while processing the file !");
-            }
+                // return status 500
 
+                throw ex;
+            }
         }
     }
 }

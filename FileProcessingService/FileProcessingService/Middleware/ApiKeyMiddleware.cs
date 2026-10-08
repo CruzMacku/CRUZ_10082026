@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
-namespace FileProcessingService.Miiddleware
+namespace FileProcessingService.Middleware
 {
     public class ApiKeyMiddleware
     {

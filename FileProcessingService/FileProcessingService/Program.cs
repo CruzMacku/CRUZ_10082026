@@ -1,9 +1,15 @@
-using FileProcessingService.Miiddleware;
+using FileProcessingService.Middleware;
+using FileProcessingService.Services;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+
+// Services
+builder.Services.AddScoped<IFileProcessor, CsvFileProcessor>();
+
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -22,6 +28,7 @@ builder.Services.AddSwaggerGen(options =>
             [new OpenApiSecuritySchemeReference("ApiKey", document)] = []
         });
 });
+
 
 var app = builder.Build();
 
