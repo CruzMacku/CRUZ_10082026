@@ -43,6 +43,10 @@ namespace FileProcessingService.Controllers
                 return Ok(result);
 
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to process the file");

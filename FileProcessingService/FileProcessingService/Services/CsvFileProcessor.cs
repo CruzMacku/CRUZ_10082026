@@ -11,7 +11,7 @@ namespace FileProcessingService.Services
             _logger = logger;
         }
 
-        public Task<FileProcessingResult> ProcessAsync(IFormFile file)
+        public async Task<FileProcessingResult> ProcessAsync(IFormFile file)
         {
             try
             {
@@ -33,18 +33,25 @@ namespace FileProcessingService.Services
 
                 using var reader = new StreamReader(file.OpenReadStream());
 
+                var header = await reader.ReadLineAsync();
+
+                var headers = header.Split(',');
+                var scoreIndex = Array.IndexOf(headers, "Score");
+
                 while (!reader.EndOfStream)
                 {
 
-                    var line = reader.ReadLine();
+                    var line = await reader.ReadLineAsync();
 
 
-                    if (string.IsNullOrWhiteSpace(line))
+                    var values = line.Split(',');
+
+                    if (values.Length <= scoreIndex)
                     {
                         continue;
                     }
 
-                    if (double.TryParse(line, out var number))
+                    if (double.TryParse(values[scoreIndex], out var number))
                     {
                         numbers.Add(number);
                     }
@@ -62,16 +69,16 @@ namespace FileProcessingService.Services
                 _logger.LogInformation("File Processed !");
                 _logger.LogInformation($"File name: {fileName} - Count: {count} - Average: {average}");
 
-                return Task.FromResult(new FileProcessingResult
+                return new FileProcessingResult
                 {
                     FileName = file.FileName,
                     Count = numbers.Count,
                     Average = numbers.Average()
-                });
+                };
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                _logger.LogError(ex, "Error while processing the file !");
                 throw new ApplicationException("Error while processing the file !", ex);
             }
 
