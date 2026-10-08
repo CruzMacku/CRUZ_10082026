@@ -10,10 +10,12 @@ namespace FileProcessingService.Controllers
     public class FilesController : ControllerBase
     {
         private readonly IFileProcessor _fileProcessor;
+        private readonly ILogger<CsvFileProcessor> _logger;
 
-        public FilesController(IFileProcessor fileProcessor)
+        public FilesController(IFileProcessor fileProcessor, ILogger<CsvFileProcessor> logger)
         {
             _fileProcessor = fileProcessor;
+            _logger = logger;
         }
 
         // Post - CSV to receive and average the numbers in the CSV file and return the average as a response
@@ -29,9 +31,8 @@ namespace FileProcessingService.Controllers
             }
             catch (Exception ex)
             {
-                // return status 500
-
-                throw ex;
+                _logger.LogError(ex, "Failed to process the file");
+                return StatusCode(500, "Failed to process the file");
             }
         }
     }

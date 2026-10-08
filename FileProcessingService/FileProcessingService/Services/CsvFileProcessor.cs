@@ -4,6 +4,13 @@ namespace FileProcessingService.Services
 {
     public class CsvFileProcessor : IFileProcessor
     {
+
+        private readonly ILogger<CsvFileProcessor> _logger;
+        public CsvFileProcessor(ILogger<CsvFileProcessor> logger)
+        {
+            _logger = logger;
+        }
+
         public Task<FileProcessingResult> ProcessAsync(IFormFile file)
         {
             try
@@ -13,9 +20,14 @@ namespace FileProcessingService.Services
                     throw new ArgumentException("Please upload a file.");
                 }
 
+                if (Path.GetExtension(file.FileName).ToLower() != ".csv")
+                {
+                    throw new ArgumentException("Only CSV files are supported.");
+                }
+
                 string fileName = file.FileName;
 
-                Console.WriteLine($"Processing : {fileName}...");
+                _logger.LogInformation($"Processing : {fileName}...");
 
                 var numbers = new List<double>();
 
@@ -47,8 +59,8 @@ namespace FileProcessingService.Services
 
                 double average = numbers.Average();
 
-                Console.WriteLine("File Processed !");
-                Console.WriteLine($"File name: {fileName} - Count: {count} - Average: {average}");
+                _logger.LogInformation("File Processed !");
+                _logger.LogInformation($"File name: {fileName} - Count: {count} - Average: {average}");
 
                 return Task.FromResult(new FileProcessingResult
                 {
